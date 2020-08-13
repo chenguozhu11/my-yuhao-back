@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuhao.core.mapper.MenuMapper">
+
+    <select id="getChildMenusById" parameterType="com.yuhao.core.entity.Menu" resultType="Menu">
+        select
+        m.xoid as id,
+        t.MENUID as parentId,
+        d.zh_cn as displayNameCn,
+        d.us_en as displayNameEn,
+        m.type,
+        m.operate,
+        m.icon,
+        m.action as url,
+        m.otheraction,
+        m.createdate
+        from gzmenu m left join gzdisplayname d on m.DISPLAYNAMEID = d.xoid LEFT JOIN gzmenutree t on m.xoid =
+        t.SUBMENUID
+        <where>
+            <if test="m.id != null and m.id != ''">
+                and m.xoid = #{m.id}
+            </if>
+            <if test="m.parentId != null and m.parentId != ''">
+                and t.MENUID = #{m.parentId}
+            </if>
+            <if test="m.type != null and m.type != ''">
+                and m.type = #{m.type}
+            </if>
+        </where>
+    </select>
+
+    <select id="getChildMenusAll" resultType="Menu">
+        select
+        m.xoid as id,
+        t.MENUID as parentId,
+        d.zh_cn as displayNameCn,
+        d.us_en as displayNameEn,
+        m.type,
+        m.operate,
+        m.icon,
+        m.action as url,
+        m.otheraction,
+        m.createdate
+        from gzmenu m left join gzdisplayname d on m.DISPLAYNAMEID = d.xoid LEFT JOIN gzmenutree t on m.xoid = t.SUBMENUID
+    </select>
+
+    <select id="getChildMenuList" resultType="Menu">
+
+        SELECT m.xoid as id,
+        d.zh_cn as displayNameCn,
+        d.us_en as displayNameEn ,
+        m.type,
+        m.operate,
+        m.icon,
+        m.action as url,
+        m.otheraction,
+        m.createdate,
+        T2.*
+        from (select  mu.* from gzmenutree mu ,(select getMenuChildList('20050000YUHAOID00002') as ids) T where  FIND_IN_SET(cast(mu.MENUID AS CHAR),T.ids)) T2
+        LEFT JOIN  gzmenu m ON m.xoid = T2.submenuid
+        LEFT JOIN gzdisplayname d on m.displaynameid = d.xoid
+        JOIN gzroleandmenu rm on rm.menuid=m.xoid
+        JOIN gzuserandrole ur on rm.roleid = ur.roleid where ur.userid = '20030000YUHAOID00001' and type = 'BUTTON';
+        <where>
+            <if test="type != null and type != ''">
+                and m.type = #{type}
+            </if>
+            <if></if>
+        </where>
+
+    </select>
+
+
+</mapper>
